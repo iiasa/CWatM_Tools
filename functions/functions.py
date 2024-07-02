@@ -1,8 +1,8 @@
 import pandas as pd
 # xlrd==1.2.0
 import xlrd, datetime, os
-xlrd.xlsx.ensure_elementtree_imported(False, None)
-xlrd.xlsx.Element_has_iter = True
+#xlrd.xlsx.ensure_elementtree_imported(False, None)
+#xlrd.xlsx.Element_has_iter = True
 
 def read_observations_excel(observations_folder):
 
@@ -50,14 +50,18 @@ def read_observations_excel(observations_folder):
     for discharge_location in Observations_namesLocations_array:
 
         if discharge_location[0] + '.xlsx' in observed_folder_list:
-            book = xlrd.open_workbook(observed_discharge_folder + '/' + discharge_location[0] + '.xlsx')
-            sheet = book.sheet_by_index(0)
-            num_rows = sheet.nrows
 
-            _Dates_observed = [xlrd.xldate_as_tuple(int(sheet.cell(row, 0).value), 0) for row in range(2, num_rows)]
-            Dates_observed = [datetime.datetime(d[0], d[1], d[2]) for d in _Dates_observed]
+            # version 1 of observations: two headers Date, Observation
+            sheet = pd.read_excel(observed_discharge_folder + '/' + discharge_location[0] + '.xlsx')
 
-            Flows_observed = [sheet.cell(row, 1).value for row in range(2, num_rows)]
+            # version 2 of observations: no headers, first two rows are not read. Dates in first column and observations in second.
+            #sheet = pd.read_excel(observed_discharge_folder + '/' + discharge_location[0] + '.xlsx', 
+            #                         header=None, skiprows=2, 
+            #                         names=['Date', 'Observation'])
+
+            sheet['Date'] = pd.to_datetime(sheet['Date']).dt.date
+            Dates_observed = sheet['Date'].tolist()
+            Flows_observed = sheet['Observation'].tolist()
 
             DATES_observed.append(Dates_observed)
             FLOWS_observed.append(Flows_observed)
@@ -68,4 +72,6 @@ def read_observations_excel(observations_folder):
             FLOWS_observed.append([])
 
     return Observations_namesLocations_array, DATES_observed, FLOWS_observed
-
+    
+observations_folder = r'/Users/admin/Documents/GitHub/CWatM_Tools'
+Stations_namesLocations, DATES_observed, FLOWS_observed = read_observations_excel(observations_folder=observations_folder)
