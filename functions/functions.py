@@ -4,7 +4,7 @@ import xlrd, datetime, os
 #xlrd.xlsx.ensure_elementtree_imported(False, None)
 #xlrd.xlsx.Element_has_iter = True
 
-def read_observations_excel(observations_folder):
+def read_observations_excel(observations_folder, Excel_two_first_rows_not_read):
 
     # Returns three arrays:
     #   Observations_namesLocations_array, [Stations[i], Latitudes[i], Longitudes[i]]_i
@@ -20,6 +20,11 @@ def read_observations_excel(observations_folder):
     # observations_folder
     # ↵ observations_locations.xlsx
     # ↵ Observations
+    #   ↵ StationName1.xlsx #two columns: Date, Observation
+    #   ↵ StationName2.xlsx #two columns: Date, Observation
+    #   ↵ ...
+
+    # for the following, set Excel_two_first_rows_not_read = True
     #   ↵ StationName1.xlsx #first two rows not read
     #   ↵ StationName2.xlsx #first two rows not read
     #   ↵ ...
@@ -51,13 +56,15 @@ def read_observations_excel(observations_folder):
 
         if discharge_location[0] + '.xlsx' in observed_folder_list:
 
-            # version 1 of observations: two headers Date, Observation
-            sheet = pd.read_excel(observed_discharge_folder + '/' + discharge_location[0] + '.xlsx')
+            if not Excel_two_first_rows_not_read:
+                # version 1 of observations: two headers Date, Observation
+                sheet = pd.read_excel(observed_discharge_folder + '/' + discharge_location[0] + '.xlsx')
 
-            # version 2 of observations: no headers, first two rows are not read. Dates in first column and observations in second.
-            #sheet = pd.read_excel(observed_discharge_folder + '/' + discharge_location[0] + '.xlsx', 
-            #                         header=None, skiprows=2, 
-            #                         names=['Date', 'Observation'])
+            else:
+                # version 2 of observations: no headers, first two rows are not read. Dates in first column and observations in second.
+                sheet = pd.read_excel(observed_discharge_folder + '/' + discharge_location[0] + '.xlsx', 
+                                         header=None, skiprows=2, 
+                                         names=['Date', 'Observation'])
 
             sheet['Date'] = pd.to_datetime(sheet['Date']).dt.date
             Dates_observed = sheet['Date'].tolist()
@@ -73,5 +80,5 @@ def read_observations_excel(observations_folder):
 
     return Observations_namesLocations_array, DATES_observed, FLOWS_observed
     
-observations_folder = r'/Users/admin/Documents/GitHub/CWatM_Tools'
-Stations_namesLocations, DATES_observed, FLOWS_observed = read_observations_excel(observations_folder=observations_folder)
+#observations_folder = r'/Users/admin/Documents/GitHub/CWatM_Tools'
+#Stations_namesLocations, DATES_observed, FLOWS_observed = read_observations_excel(observations_folder=observations_folder)
