@@ -1,10 +1,9 @@
 import pandas as pd
-# xlrd==1.2.0
 import xlrd, datetime, os
 #xlrd.xlsx.ensure_elementtree_imported(False, None)
 #xlrd.xlsx.Element_has_iter = True
 
-def read_observations_excel(observations_folder, Excel_two_first_rows_not_read):
+def read_observations_excel(observations_folder, Excel_two_first_rows_not_read=False):
 
     # Returns three arrays:
     #   Observations_namesLocations_array, [Stations[i], Latitudes[i], Longitudes[i]]_i
@@ -24,7 +23,9 @@ def read_observations_excel(observations_folder, Excel_two_first_rows_not_read):
     #   ↵ StationName2.xlsx #two columns: Date, Observation
     #   ↵ ...
 
-    # for the following, set Excel_two_first_rows_not_read = True
+    # for the following, set Excel_two_first_rows_not_read = True. 
+    # In this case, the headers can be anything, as they are not read. 
+    # Dates are to be in the first column, and observations in the second.
     #   ↵ StationName1.xlsx #first two rows not read
     #   ↵ StationName2.xlsx #first two rows not read
     #   ↵ ...
@@ -61,7 +62,8 @@ def read_observations_excel(observations_folder, Excel_two_first_rows_not_read):
                 sheet = pd.read_excel(observed_discharge_folder + '/' + discharge_location[0] + '.xlsx')
 
             else:
-                # version 2 of observations: no headers, first two rows are not read. Dates in first column and observations in second.
+                # version 2 of observations: no headers, first two rows are not read. 
+                # Dates in the first column and observations in the second.
                 sheet = pd.read_excel(observed_discharge_folder + '/' + discharge_location[0] + '.xlsx', 
                                          header=None, skiprows=2, 
                                          names=['Date', 'Observation'])
@@ -79,6 +81,3 @@ def read_observations_excel(observations_folder, Excel_two_first_rows_not_read):
             FLOWS_observed.append([])
 
     return Observations_namesLocations_array, DATES_observed, FLOWS_observed
-    
-#observations_folder = r'/Users/admin/Documents/GitHub/CWatM_Tools'
-#Stations_namesLocations, DATES_observed, FLOWS_observed = read_observations_excel(observations_folder=observations_folder)
